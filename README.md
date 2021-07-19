@@ -763,20 +763,16 @@ routes.get("/", (req, res) => {
   db.User.findAll().then((user) => res.json(user));
 });
 
-routes.get("/findAllUserInClass/:id", (req, res) => {
-  db.User.findAll().then((user) => res.json(user));
-});
-
-routes.get("/findAllClassOfUser/:id", (req, res) => {
-  db.Class.findAll({
+routes.get("/findAllUserInClass/:name", (req, res) => {
+  db.User.findAll({
     attributes: ["name"],
     include: [
       {
         attributes: [],
         model: db.UserClass,
-        where: { userId: req.params.id },
+        where: {},
         include: [
-          { attributes: [], model: db.User, where: { id: req.params.id } },
+          { attributes: [], model: db.Class, where: { name: req.params.name } },
         ],
       },
     ],
@@ -822,16 +818,16 @@ Tài liệu tham khảo: https://sequelize.org/master/manual/model-querying-basi
 #### apiRoutes.js
 
 ```
-routes.get("/findAllClassOfUser/:id", (req, res) => {
-  db.Class.findAll({
+routes.get("/findAllUserInClass/:name", (req, res) => {
+  db.User.findAll({
     attributes: ["name"],
     include: [
       {
         attributes: [],
         model: db.UserClass,
-        where: { userId: req.params.id },
+        where: {},
         include: [
-          { attributes: [], model: db.User, where: { id: req.params.id } },
+          { attributes: [], model: db.Class, where: { name: req.params.name } },
         ],
       },
     ],
@@ -842,4 +838,4 @@ routes.get("/findAllClassOfUser/:id", (req, res) => {
 - **attributes** sẽ quyết định dữ liệu nào của Model được trả về. Nếu để mảng rỗng, dữ liệu sẽ không trả về. Nếu không có thuộc tính attributes, dữ liệu trả về tất cả các dữ liệu
 - **include** để JOIN 2 Table lại với nhau
 - **model** là tên Table được JOIN
-- **where** là điều kiện trên chính Table đó
+- **where** là điều kiện trên chính Table đó. Trong JOIN Table, where là {} (Một Object rỗng) hoặc có tham số thì sẽ INNER JOIN (Recommend sử dụng cái này như Example trên), còn nếu không thì LEFT OUTER JOIN.
