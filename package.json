@@ -1,19 +1,20 @@
 {
-  "name": "SEQ-TEST",
+  "name": "NODEJS-SEQUELIZE-README",
   "version": "1.0.0",
   "main": "index.js",
+  "repository": "git@github.com:phamdanhdev/NODEJS-SEQUELIZE-README.git",
+  "author": "phamdanhdev <phamdanh.dev@gmail.com>",
   "license": "MIT",
   "scripts": {
     "start": "nodemon server.js"
   },
-  "devDependencies": {
-    "sequelize-cli": "^6.2.0"
-  },
   "dependencies": {
     "express": "^4.17.1",
-    "faker": "^5.5.3",
     "mysql2": "^2.2.5",
     "nodemon": "^2.0.12",
     "sequelize": "^6.6.5"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.2.0"
   }
 }
