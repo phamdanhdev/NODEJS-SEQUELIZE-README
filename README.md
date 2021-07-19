@@ -1,8 +1,9 @@
-﻿
-# Integrate NodeJS + Sequelize + MySQL
+﻿# Integrate NodeJS + Sequelize + MySQL
+
 Chúng ta sẽ xây dựng một Project đơn giản và tìm hiểu cách tích hợp NodeJS và Sequelize với nhau và kiểm tra dữ liệu trả về bằng API
 
 ### Chuẩn bị và cài đặt trước?
+
 - VS Code
 - Yarn
 - NodeJS
@@ -10,13 +11,17 @@ Chúng ta sẽ xây dựng một Project đơn giản và tìm hiểu cách tíc
 - Internet
 
 ### Sequelize là gì?
+
 Sequelize là một ORM Node.js dựa trên Promise. Nó có thể được sử dụng với PostgreSQL, MySQL, MariaDB, SQLite và MSSQL.
+
 - Giúp cho việc tạo Table dưới DB nhanh chóng
-- Tạo liên kết giữa các Table dễ dàng (Nói vậy chứ cũng khoai đấy 😄 ) 
+- Tạo liên kết giữa các Table dễ dàng (Nói vậy chứ cũng khoai đấy 😄 )
 - Không cần dùng Query để truy vấn, chỉ cần sử dụng các hàm được build sẵn của Models
 
 ### Migrations, Seeders, Faker, Association, Query Models là gì và cách sử dụng nó?
+
 Project này sẽ sử dụng các công cụ trên để phục vụ cho việc tích hợp NodeJS và Sequelize nhanh và dễ dàng hơn
+
 - **Migrations** là công cụ để Sequelize tạo bảng dưới DB mà không cần Excute câu Query để tạo bảng trong MySQL Workbench.
 - **Seeders** là công cụ để chứa các dữ liệu tĩnh (Dummy data), sử dụng cho việc đẩy dữ liệu vào DB để test các API.
 - **Faker** là công cụ để tạo ra dữ liệu tĩnh (Dummy data)
@@ -24,29 +29,39 @@ Project này sẽ sử dụng các công cụ trên để phục vụ cho việc
 - **Query Models** là sử dụng các hàm được build sẵn để lấy dữ liệu từ DB
 
 ## Bắt đầu thôi!
+
 Trước tiên ta cần phải có 1 Project NodeJS và 1 Schema trong DB
 
 **I. Tạo Project NodeJS**
 
 - Trong Terminal
+
 ```bash
   yarn init -y
 ```
+
 - Thêm các thư viện
+
 ```bash
-  yarn add express sequelize mysql2 nodemon
+  yarn add express sequelize mysql2 nodemon faker
 ```
+
 thêm công cụ này nữa:
+
 ```bash
   yarn add sequelize-cli --dev
 ```
+
 - Cấu hình **package.json** một chút, thêm dòng này để nodemon tự restart server khi có thay đổi:
+
 ```bash
     "scripts": {
     "start": "nodemon server.js"
     },
 ```
+
 **package.json** sẽ như này:
+
 ```bash
     {
   "name": "NODEJS-SEQUELIZE-README",
@@ -60,6 +75,7 @@ thêm công cụ này nữa:
   },
   "dependencies": {
     "express": "^4.17.1",
+    "faker": "^5.5.3",
     "mysql2": "^2.2.5",
     "nodemon": "^2.0.12",
     "sequelize": "^6.6.5"
@@ -70,7 +86,9 @@ thêm công cụ này nữa:
 }
 
 ```
+
 - Tạo 1 file **server.js** đơn giản trên PORT 3001 (Có thể thay đổi PORT khác)
+
 ```bash
 const express = require("express");
 const app = express();
@@ -82,10 +100,11 @@ app.listen("3001", () => {
     console.log(`SERVER STARTED ON PORT 3001`);
   });
 ```
+
 **II. Tạo Schema trong DB**
 
 - Mở **MySQL Workbench**, tạo 1 Schema tên **migratetest** là xong
-Chúng ta không cần tạo Table hay chạy 1 câu Query nào.
+  Chúng ta không cần tạo Table hay chạy 1 câu Query nào.
 
 ## ERD của Database
 
@@ -94,15 +113,14 @@ Chúng ta có 1 DB đơn giản với các Table như sau:
 #### User
 
 Người dùng, cụ thể là 1 Student
+
 - Table **User** có quan hệ **Many - Many** với Table **Class**
 - Table **User** có quan hệ **One - One** với Table **Doc** (Documnent)
 
-
-| KEY | Column Name    | Type                |
-| :-------- | :------- | :------------------------- |
-| PK | id | integer |
-|  | name | varchar |
-
+| KEY | Column Name | Type    |
+| :-- | :---------- | :------ |
+| PK  | id          | integer |
+|     | name        | varchar |
 
 #### Class
 
@@ -110,10 +128,10 @@ Một lớp học
 
 - Table **Class** có quan hệ **Many - Many** với Table **User**
 
-| KEY | Column Name    | Type                |
-| :-------- | :------- | :------------------------- |
-| PK | id | integer |
-|  | name | varchar |
+| KEY | Column Name | Type    |
+| :-- | :---------- | :------ |
+| PK  | id          | integer |
+|     | name        | varchar |
 
 #### Doc (Documnent)
 
@@ -121,12 +139,11 @@ Mỗi học sinh sẽ có 1 tài liệu để chứng minh là Student
 
 - Table **Doc** (Documnent) có quan hệ **One - One** với Table **User**
 
-
-| KEY | Column Name    | Type                |
-| :-------- | :------- | :------------------------- |
-| PK | id | integer |
-|  | name | varchar |
-| FK | userId | integer |
+| KEY | Column Name | Type    |
+| :-- | :---------- | :------ |
+| PK  | id          | integer |
+|     | name        | varchar |
+| FK  | userId      | integer |
 
 #### UserClass
 
@@ -134,29 +151,31 @@ Một Bridge Table được tạo từ quan hệ **Many - Many** của Table **U
 
 - Table **Doc** (Documnent) có quan hệ **One - One** với Table **User**
 
-| KEY | Column Name    | Type                |
-| :-------- | :------- | :------------------------- |
-| PK | id | integer |
-| FK | userId | integer |
-| FK | classId | integer |
-
-
+| KEY | Column Name | Type    |
+| :-- | :---------- | :------ |
+| PK  | id          | integer |
+| FK  | userId      | integer |
+| FK  | classId     | integer |
 
 ## Tích hợp Sequelize với NodeJS
 
 Tài liệu tham khảo **Sequelize Commands**: https://www.npmjs.com/package/sequelize-cli
 
 Trong Terminal, khởi tạo Sequelize bằng lệnh:
+
 ```bash
     sequelize init
 ```
+
 Sau khi chạy lệnh trên, các folder sẽ được **tự động tạo**:
+
 - **config** có sẵn file **config.json** chứa thông tin DB
 - **migrations** để chứa các file tạo Table dưới DB
 - **models** để chứa các Models.
 - **seeders** để chứa file tạo dữ liệu tĩnh (Dummy data)
 
 Mở file **config.json** trong folder **config** cấu hình thông tin DB
+
 ```bash
   "development": {
     "username": "root",
@@ -166,7 +185,9 @@ Mở file **config.json** trong folder **config** cấu hình thông tin DB
     "dialect": "mysql"
   },
 ```
+
 Sau đó trong Terminal, tạo kết nối Sequelize tới DB dựa trên thông tin trong file **config.json**:
+
 ```bash
     sequelize db:create
 ```
@@ -184,27 +205,33 @@ Sau khi gõ lệnh tạo, Sequelize sẽ tự động tạo 2 file tương ứng
 Về lý thuyết, file ở folder Migrations để tạo dữ liệu các Table và liên kết của nó dưới DB, còn file ở folder Models phục vụ cho việc gọi Model để thực hiện Query
 Về liên kết, chúng ta phải cấu hình liên kết cho Migrations riêng và Models riêng
 ```
+
 Cú pháp:
+
 ```bash
 sequelize model:generate --name NameOfModel --attributes NameOfProperty:TypeOfProperty
 ```
 
--  Tạo Model **User**
+- Tạo Model **User**
+
 ```bash
 sequelize model:generate --name User --attributes name:string
 ```
 
--  Tạo Model **Class**
+- Tạo Model **Class**
+
 ```bash
 sequelize model:generate --name Class --attributes name:string
 ```
 
--  Tạo Model **Doc**
+- Tạo Model **Doc**
+
 ```bash
 sequelize model:generate --name Doc --attributes name:string,userId:integer
 ```
 
--  Tạo Model **UserClass**
+- Tạo Model **UserClass**
+
 ```bash
 sequelize model:generate --name UserClass --attributes userId:integer,classId:integer
 ```
@@ -229,7 +256,8 @@ Có 3 cặp liên kết:
 ```
 
 #### Các Model sau khi được gắn liên kết:
--  Model **User**
+
+- Model **User**
 
 #### user.js
 
@@ -268,6 +296,7 @@ module.exports = (sequelize, DataTypes) => {
 ```
 
 #### xxxxxxxxxxxxxx-create-user.js
+
 ```
 'use strict';
 module.exports = {
@@ -298,7 +327,7 @@ module.exports = {
 };
 ```
 
--  Model **Class**
+- Model **Class**
 
 #### class.js
 
@@ -333,6 +362,7 @@ module.exports = (sequelize, DataTypes) => {
 ```
 
 #### xxxxxxxxxxxxxx-create-class.js
+
 ```
 'use strict';
 module.exports = {
@@ -363,7 +393,7 @@ module.exports = {
 };
 ```
 
--  Model **Doc**
+- Model **Doc**
 
 #### doc.js
 
@@ -397,6 +427,7 @@ module.exports = (sequelize, DataTypes) => {
 ```
 
 #### xxxxxxxxxxxxxx-create-doc.js
+
 ```
 "use strict";
 module.exports = {
@@ -436,7 +467,7 @@ module.exports = {
 
 ```
 
--  Model **UserClass**
+- Model **UserClass**
 
 #### userclass.js
 
@@ -471,6 +502,7 @@ module.exports = (sequelize, DataTypes) => {
 ```
 
 #### xxxxxxxxxxxxxx-create-user-class.js
+
 ```
 "use strict";
 module.exports = {
@@ -520,6 +552,7 @@ Trong Terminal, chạy lệnh này để tạo các Table trong DB
 ```
 sequelize db:migrate
 ```
+
 Có thể kiểm tra lại trong `MySQL Workbench`
 
 ## Sử dụng Seeders và Faker tạo dữ liệu cho DB
@@ -534,6 +567,7 @@ Faker được sử dụng để tạo ra dữ liệu ngẫu nhiên
 Tham khảo tài liệu Faker: https://yarnpkg.com/package/faker
 
 Cú pháp tạo Seeders
+
 ```
 sequelize seed:create --name nameOfBlaBla
 ```
@@ -551,6 +585,7 @@ sequelize seed:create --name ClassData
 ```
 sequelize seed:create --name DocData
 ```
+
 ```
 sequelize seed:create --name UserClassData
 ```
@@ -558,6 +593,7 @@ sequelize seed:create --name UserClassData
 Dữ liệu các file trong folder Seeders như sau:
 
 #### xxxxxxxxxxxxxx-UserData.js
+
 ```
 "use strict";
 
@@ -585,7 +621,9 @@ module.exports = {
 };
 
 ```
+
 #### xxxxxxxxxxxxxx-ClassData.js
+
 ```
 "use strict";
 
@@ -612,7 +650,9 @@ module.exports = {
 };
 
 ```
+
 #### xxxxxxxxxxxxxx-DocData.js
+
 ```
 "use strict";
 
@@ -642,7 +682,9 @@ module.exports = {
 };
 
 ```
+
 #### xxxxxxxxxxxxxx-UserClassData.js
+
 ```
 "use strict";
 module.exports = {
